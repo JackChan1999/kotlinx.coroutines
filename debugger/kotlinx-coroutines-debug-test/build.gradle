@@ -1,0 +1,8 @@
+dependencies {
+    testCompile 'junit:junit:4.12'
+    compile project(':kotlinx-coroutines-debug-manager')
+    compile project(':kotlinx-coroutines-core')
+    testCompile files("${System.properties.'java.home'}/../lib/tools.jar")
+}
+
+test.dependsOn project(":kotlinx-coroutines-debug-agent").tasks.build

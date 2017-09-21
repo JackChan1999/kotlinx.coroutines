@@ -19,6 +19,21 @@ buildscript {
     }
 }
 
+project.ext {
+    CLASSES_AFTER_DEBUGGER_TRANSFORM = file("$buildDir/classes-debuggable/main")
+}
+
+FileCollection replaceMainClassPathWithTransformed(filesList, transformed) {
+    def index = filesList.findIndexOf { it == sourceSets.main.output.classesDir }
+    def list = filesList.toList()
+    list.set(index, transformed)
+    return files(list)
+}
+
+FileCollection replaceMainClassPathWithDebuggable(filesList) {
+    return replaceMainClassPathWithTransformed(filesList, CLASSES_AFTER_DEBUGGER_TRANSFORM)
+}
+
 subprojects {
     apply plugin: 'kotlin'
     apply plugin: 'org.jetbrains.dokka'
@@ -73,6 +88,18 @@ subprojects {
         testCompileOnly "org.jetbrains.kotlinx:atomicfu:$atomicFU_version"
         testRuntime "org.jetbrains.kotlinx:atomicfu:$atomicFU_version"
     }
+
+    task testWithDebugger(type: Test) {
+        classpath = replaceMainClassPathWithDebuggable(classpath)
+        println(project.name)
+        println("CLASSES_AFTER_DEBUGGER_TRANSFORM = ${file("$buildDir/classes-debuggable/main")}")
+        println("classpath:")
+        classpath.each {println(it)}
+        println("-----------------------")
+        //}
+    }
+    //testWithDebugger.dependsOn check
+    //build.dependsOn testWithDebugger
 }
 
 configure(subprojects.findAll { !['kotlinx-coroutines-core', 'benchmarks', 'knit', 'site'].contains(it.name) }) {

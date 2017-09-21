@@ -27,15 +27,19 @@ sourceSets {
     }
 }
 
-FileCollection replaceMainClassPathWithTransformed(filesList) {
+FileCollection replaceMainClassPathWithAtomicFU(filesList) {
+    return replaceMainClassPathWithTransformed(filesList, CLASSES_AFTER_ATOMICFU_TRANSFORM)
+}
+
+FileCollection replaceMainClassPathWithTransformed(filesList, transformed) {
     def index = filesList.findIndexOf { it == sourceSets.main.output.classesDir }
     def list = filesList.toList()
-    list.set(index, CLASSES_AFTER_ATOMICFU_TRANSFORM)
+    list.set(index, transformed)
     return files(list)
 }
 
 test {
-    classpath = replaceMainClassPathWithTransformed(classpath)
+    classpath = replaceMainClassPathWithAtomicFU(classpath)
     minHeapSize = '1g'
     maxHeapSize = '1g'
     exclude '**/*LinearizabilityTest.*'
